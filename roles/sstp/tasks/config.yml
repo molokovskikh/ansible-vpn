@@ -28,11 +28,13 @@
 - name: Export certificate
   become: true
   become_user: root
+  args:
+    chdir: "{{ vpnserver_dir }}"
   command: >
     {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD ServerCertGet {{ vpn_domain_name }}.cer
 
 - name: Get certificate content
-  command: cat {{ vpnserver_dir }}/chain_certs/{{ vpn_domain_name }}.cer
+  command: cat {{ vpnserver_dir }}/{{ vpn_domain_name }}.cer
   register: cert_content
 
 - name: Print certificate
@@ -45,6 +47,13 @@
   become_user: root
   loop:
     - SstpEnable yes
+  command: >
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD {{ item }}
+
+- name: Get SSTP status
+  become: true
+  become_user: root
+  loop:
     - StatusGet
   command: >
-    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD {{ item }} /PASSWORD
+    {{ vpnserver_dir }}/vpncmd  /HUB:{{ sstp_hub_name }} /SERVER 127.0.0.1 /CMD {{ item }}
