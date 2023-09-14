@@ -22,12 +22,23 @@
 - name: Generate certificate
   become: true
   become_user: root
-  loop:
-    - ServerCertRegenerate {{ vpn_domain_name }}
-    - ServerCertGet {{ vpn_domain_name }}.cer
   command: >
-    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD {{ item }}
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD ServerCertRegenerate {{ vpn_domain_name }}
 
+- name: Export certificate
+  become: true
+  become_user: root
+  command: >
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD ServerCertGet {{ vpn_domain_name }}.cer
+
+- name: Get certificate content
+  command: cat {{ vpnserver_dir }}/chain_certs/{{ vpn_domain_name }}.cer
+  register: cert_content
+
+- name: Print certificate
+  ansible.builtin.debug:
+    msg: SSTP certificate {{ cert_content }}
+    verbosity: 2
 
 - name: Configure SSTP options
   become: true
