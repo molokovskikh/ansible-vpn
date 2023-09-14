@@ -19,11 +19,37 @@
     {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD UserCreate {{ item.key }} /GROUP:none /REALNAME:none /NOTE:none;
     {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD UserPasswordSet {{ item.key }} /PASSWORD:{{ item.value.password }}
 
+- name: sstp settings
+  become: true
+  become_user: root
+  command: "{{ vpnserver_dir }}/vpncmd /HUB:{{ sstp_hub_name }} /SERVER 127.0.0.1 /CMD SecureNatEnable"
+
+
+- name: dhcp settings
+  become: true
+  become_user: root
+  command: > 
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD
+    DhcpSet /START:{{ dhcp_settings.start }} /END:{{ dhcp_settings.end }} /MASK:{{ dhcp_settings.mask }}
+    /GW:{{ dhcp_settings.gateway }}
+    /DNS:{{ dhcp_settings.dns }} /DNS2:{{ dhcp_settings.dns2 }} /DOMAIN:{{ dhcp_settings.domain }}
+    /EXPIRE:{{ dhcp_settings.expire }}  /LOG:{{ dhcp_settings.log }}
+  when: dhcp_settings is defined
+
+
+- name: Change Active Hub
+  become: true
+  become_user: root
+  command: >
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD
+    IPsecEnable /L2TP:no /L2TPRAW:no /ETHERIP:no /DEFAULTHUB:{{ sstp_hub_name }} /PSK:vpn  
+
 - name: Generate certificate
   become: true
   become_user: root
   command: >
     {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD ServerCertRegenerate {{ vpn_domain_name }}
+  when: regenerate_certificate is defined and regenerate_certificate
 
 - name: Export certificate
   become: true
@@ -41,14 +67,7 @@
   ansible.builtin.debug:
     msg: SSTP certificate {{ cert_content }}
     verbosity: 2
-
-- name: Configure SSTP options
-  become: true
-  become_user: root
-  loop:
-    - SstpEnable yes
-  command: >
-    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD {{ item }}
+  when: regenerate_certificate is defined and regenerate_certificate
 
 - name: Get SSTP status
   become: true
@@ -57,3 +76,9 @@
     - StatusGet
   command: >
     {{ vpnserver_dir }}/vpncmd  /HUB:{{ sstp_hub_name }} /SERVER 127.0.0.1 /CMD {{ item }}
+
+- name: flush sstp settings
+  become: true
+  become_user: root
+  command: "{{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD Flush"
+

@@ -7,4 +7,15 @@ sstp_users:
     password: pass4word!
 
 vpn_domain_name: mydomain.com
+regenerate_certificate: false
 
+dhcp_settings:
+  start: 10.100.30.10 
+  end: 10.100.30.15 
+  mask: 255.255.255.0 
+  dns: none 
+  dns2: none 
+  domain: none 
+  expire: 2000000 
+  gateway: none
+  log: no
