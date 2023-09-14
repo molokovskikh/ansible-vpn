@@ -1,0 +1,39 @@
+- name: Create Hub for SSTP
+  become: true
+  become_user: root
+  command: >
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD HubCreate {{ sstp_hub_name }} /PASSWORD
+  ignore_errors: true
+
+- name: Print sstp users
+  ansible.builtin.debug:
+    msg: SSTP user {{ item }}
+    verbosity: 2
+  with_dict: "{{ sstp_users }}"
+
+- name: Create Users
+  become: true
+  become_user: root
+  with_dict: "{{ sstp_users }}"
+  shell: |-
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD UserCreate {{ item.key }} /GROUP:none /REALNAME:none /NOTE:none;
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD UserPasswordSet {{ item.key }} /PASSWORD:{{ item.value.password }}
+
+- name: Generate certificate
+  become: true
+  become_user: root
+  loop:
+    - ServerCertRegenerate {{ vpn_domain_name }}
+    - ServerCertGet {{ vpn_domain_name }}.cer
+  command: >
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD {{ item }}
+
+
+- name: Configure SSTP options
+  become: true
+  become_user: root
+  loop:
+    - SstpEnable yes
+    - StatusGet
+  command: >
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD {{ item }} /PASSWORD

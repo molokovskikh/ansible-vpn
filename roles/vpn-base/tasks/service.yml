@@ -1,0 +1,21 @@
+- name: add vpnserver service
+  become: true
+  become_user: root
+  template:
+    src: vpnserver.service
+    dest: /etc/systemd/system/{{ service_name }}.service
+    mode: 0644
+  notify: restart {{ service_name }}
+
+- name: systemctl daemon-reload
+  become: true
+  become_user: root
+  command: systemctl daemon-reload
+
+- name: ensure started, enable on boot
+  become: true
+  become_user: root
+  service:
+    name: "{{ service_name }}"
+    state: started
+    enabled: yes

@@ -1,0 +1,61 @@
+- name: check install already
+  ansible.builtin.stat:
+    path: "{{ vpnserver_dir }}/vpnserver"
+  register: vpnserver_bin
+
+- name: Install build requirement packages
+  ansible.builtin.yum:
+    name:
+      - curl
+      - make
+      - gcc
+      - binutils
+      - tar
+    state: present
+  when: not vpnserver_bin.stat.exists
+
+- name: Create temporary download-build directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: download_dir
+  when: not vpnserver_bin.stat.exists
+
+
+- name: download and extract vpnserver
+  unarchive:
+    remote_src: true
+    src: "{{ vpnserver_src }}"
+    dest: "{{ download_dir.path }}"
+  when: not vpnserver_bin.stat.exists
+
+- name: build vpnserver, vpncmd
+  make:
+    chdir: "{{ download_dir.path }}/vpnserver"
+    target: main
+  when: not vpnserver_bin.stat.exists
+
+- name: create vpnserver_dir
+  become: true
+  become_user: root
+  file:
+    path: "{{ vpnserver_dir }}"
+    state: directory
+    mode: 0755
+  when: not vpnserver_bin.stat.exists
+
+- name: install vpnserver files to vpnserver dir
+  ansible.builtin.shell: install -m 700 -t {{ vpnserver_dir }} vpnserver vpncmd hamcore.se2
+  args:
+    chdir: "{{ download_dir.path }}/vpnserver"
+  when: not vpnserver_bin.stat.exists
+
+  
+- name: delete download dir
+  become: true
+  become_user: root
+  file:
+    path: "{{ download_dir.path }}"
+    state: absent
+  when: download_dir.path is defined
+
+

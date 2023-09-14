@@ -1,0 +1,7 @@
+- hosts: sstp
+  gather_facts: no
+  vars_files:
+    - group_vars/vars.yml
+  roles:
+    - vpn-base
+    - sstp

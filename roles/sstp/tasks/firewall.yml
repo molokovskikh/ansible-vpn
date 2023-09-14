@@ -1,0 +1,5 @@
+- name: Add firewall rule
+  become: true
+  become_user: root
+  command: >
+      firewall-cmd --permanent --zone=dmz --add-port=${sstp_server_port}/tcp

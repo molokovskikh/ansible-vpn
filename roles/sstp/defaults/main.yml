@@ -1,0 +1,10 @@
+sstp_hub_name: SSTP
+sstp_server_port: 443
+sstp_users:
+  john:
+    password: 12345
+  serg:
+    password: pass4word!
+
+vpn_domain_name: mydomain.com
+

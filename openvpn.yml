@@ -1,0 +1,6 @@
+- hosts: openvpn
+  vars_files:
+    - group_vars/vars.yml
+  roles:
+    - vpn-base
+    - openvpn

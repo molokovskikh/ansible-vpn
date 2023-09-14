@@ -1,0 +1,6 @@
+- hosts: sstp
+  vars_files:
+    - group_vars/vars.yml
+  roles:
+    - vpn-base
+    - wireguard
