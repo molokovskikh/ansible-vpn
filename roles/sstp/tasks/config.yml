@@ -27,11 +27,9 @@
 - name: Vpn settings
   become: true
   become_user: root
-  shell: |-
-    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD  NatSet /MTU: {{ vpn_settings.mtu | default(1500) }} \
-   /TCPTIMEOUT:{{ vpn_settings.tcptimeout | default(1800) }} /UDPTIMEOUT:{{ vpn_settings.udptimeout | default(60) }} /LOG:{{ vpn_settings.log | default('no') }};
-    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD  SecureNatHostSet /MAC:{{ vpn_settings.mac | default('5E-64-EB-E1-14-1F') }} \
-   /IP:{{ vpn_settings.ip }} /MASK:{{ vpn_settings.mask | default('255.255.255.0') }};
+  shell: |
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD  NatSet /MTU: {{ vpn_settings.mtu | default(1500) }}  /TCPTIMEOUT:{{ vpn_settings.tcptimeout | default(1800) }} /UDPTIMEOUT:{{ vpn_settings.udptimeout | default(60) }} /LOG:{{ vpn_settings.log | default('no') }};
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD  SecureNatHostSet /MAC:{{ vpn_settings.mac | default('5E-64-EB-E1-14-1F') }} /IP:{{ vpn_settings.ip }} /MASK:{{ vpn_settings.mask | default('255.255.255.0') }};
   when: vpn_settings is defined
 
 - name: Dhcp settings

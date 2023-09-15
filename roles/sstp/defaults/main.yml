@@ -22,3 +22,9 @@ dhcp_settings:
 
 vpn_settings:
  ip: 10.100.30.1
+ mtu: 1412
+ log: no
+ udptimeout: 60
+ tcptimeout: 1800
+ mac: 5E-64-EB-E1-14-1F
+ mask: 255.255.255.0
