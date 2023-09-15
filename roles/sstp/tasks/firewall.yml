@@ -2,7 +2,7 @@
   become: true
   become_user: root
   command: >
-      firewall-cmd --permanent --zone=dmz --add-port={{ sstp_server_port }}/tcp
+      firewall-cmd --permanent --zone=public --add-port={{ sstp_server_port }}/tcp
   ignore_errors: true
 
 - name: Reload firewall
