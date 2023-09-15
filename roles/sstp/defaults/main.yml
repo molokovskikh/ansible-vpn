@@ -19,3 +19,6 @@ dhcp_settings:
   expire: 2000000 
   gateway: none
   log: no
+
+vpn_settings:
+ ip: 10.100.30.1

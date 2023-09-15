@@ -19,13 +19,22 @@
     {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD UserCreate {{ item.key }} /GROUP:none /REALNAME:none /NOTE:none;
     {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD UserPasswordSet {{ item.key }} /PASSWORD:{{ item.value.password }}
 
-- name: sstp settings
+- name: Sstp settings
   become: true
   become_user: root
   command: "{{ vpnserver_dir }}/vpncmd /HUB:{{ sstp_hub_name }} /SERVER 127.0.0.1 /CMD SecureNatEnable"
 
+- name: Vpn settings
+  become: true
+  become_user: root
+  shell: |-
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD  NatSet /MTU: {{ vpn_settings.mtu | default(1500) }} \
+   /TCPTIMEOUT:{{ vpn_settings.tcptimeout | default(1800) }} /UDPTIMEOUT:{{ vpn_settings.udptimeout | default(60) }} /LOG:{{ vpn_settings.log | default('no') }};
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD  SecureNatHostSet /MAC:{{ vpn_settings.mac | default('5E-64-EB-E1-14-1F') }} \
+   /IP:{{ vpn_settings.ip }} /MASK:{{ vpn_settings.mask | default('255.255.255.0') }};
+  when: vpn_settings is defined
 
-- name: dhcp settings
+- name: Dhcp settings
   become: true
   become_user: root
   command: > 
@@ -77,8 +86,13 @@
   command: >
     {{ vpnserver_dir }}/vpncmd  /HUB:{{ sstp_hub_name }} /SERVER 127.0.0.1 /CMD {{ item }}
 
-- name: flush sstp settings
+- name: Flush sstp settings
   become: true
   become_user: root
   command: "{{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD Flush"
+
+- name: Reboot current session
+  become: true
+  become_user: root
+  command: "{{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD Reboot"
 
