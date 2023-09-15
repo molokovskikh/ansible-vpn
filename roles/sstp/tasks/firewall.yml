@@ -4,3 +4,10 @@
   command: >
       firewall-cmd --permanent --zone=dmz --add-port={{ sstp_server_port }}/tcp
   ignore_errors: true
+
+- name: Reload firewall
+  become: true
+  become_user: root
+  command: >
+      firewall-cmd --reload
+  ignore_errors: true
