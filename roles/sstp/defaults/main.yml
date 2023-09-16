@@ -1,10 +1,8 @@
 sstp_hub_name: SSTP
 sstp_server_port: 443
 sstp_users:
-  john:
-    password: 12345
-  serg:
-    password: pass4word!
+  t0gHtsRfacbsdfkHfgsTdsSd:
+    password: Xdxr@k2EEZ8FrQU?
 
 vpn_domain_name: mydomain.com
 regenerate_certificate: false
@@ -22,9 +20,5 @@ dhcp_settings:
 
 vpn_settings:
  ip: 10.100.30.1
- mtu: 1412
- log: no
- udptimeout: 60
- tcptimeout: 1800
- mac: 5E-64-EB-E1-14-1F
  mask: 255.255.255.0
+ mac_prefix: '5E:64'

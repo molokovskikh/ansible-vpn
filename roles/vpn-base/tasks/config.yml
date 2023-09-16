@@ -16,10 +16,19 @@
     /EXPIRE:{{ dhcp_settings.expire }}  /LOG:{{ dhcp_settings.log }}
   when: dhcp_settings is defined
 
+- name: Vpn settings
+  become: true
+  become_user: root
+  shell: |
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:default /CMD  NatSet /MTU:{{ vpn_settings.mtu | default(1500) }}  /TCPTIMEOUT:{{ vpn_settings.tcptimeout | default(1800) }} /UDPTIMEOUT:{{ vpn_settings.udptimeout | default(60) }} /LOG:{{ vpn_settings.log | default('no') }};
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:default /CMD  SecureNatHostSet /MAC:{{ vpn_settings.mac_prefix | random_mac | regex_replace(':','-') }} /IP:{{ vpn_settings.ip }} /MASK:{{ vpn_settings.mask | default('255.255.255.0') }};
+  when: vpn_settings is defined
+
 - name: additional settings
   become: true
   become_user: root
-  command: "{{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:default /CMD {{ item }}"
+  command: >
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:default /CMD {{ item }}
   loop:
     - SecureNatEnable
     - NatEnable

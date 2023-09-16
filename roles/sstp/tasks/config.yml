@@ -29,7 +29,7 @@
   become_user: root
   shell: |
     {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD  NatSet /MTU:{{ vpn_settings.mtu | default(1500) }}  /TCPTIMEOUT:{{ vpn_settings.tcptimeout | default(1800) }} /UDPTIMEOUT:{{ vpn_settings.udptimeout | default(60) }} /LOG:{{ vpn_settings.log | default('no') }};
-    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD  SecureNatHostSet /MAC:{{ vpn_settings.mac | default('5E-64-EB-E1-14-1F') }} /IP:{{ vpn_settings.ip }} /MASK:{{ vpn_settings.mask | default('255.255.255.0') }};
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /HUB:{{ sstp_hub_name }} /CMD  SecureNatHostSet /MAC:{{ vpn_settings.mac_prefix | random_mac | regex_replace(':','-') }} /IP:{{ vpn_settings.ip }} /MASK:{{ vpn_settings.mask | default('255.255.255.0') }};
   when: vpn_settings is defined
 
 - name: Dhcp settings
@@ -50,6 +50,13 @@
   command: >
     {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD
     IPsecEnable /L2TP:no /L2TPRAW:no /ETHERIP:no /DEFAULTHUB:{{ sstp_hub_name }} /PSK:vpn  
+
+- name: Create L2 bridge
+  become: true
+  become_user: root
+  shell: >
+    {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD BridgeDeviceList|tail -n+13|head -n-2| 
+    while read -r iface; do  {{ vpnserver_dir }}/vpncmd /SERVER 127.0.0.1 /CMD BridgeCreate {{ sstp_hub_name }} /DEVICE:$iface; done
 
 - name: Generate certificate
   become: true
